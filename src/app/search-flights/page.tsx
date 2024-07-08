@@ -68,7 +68,12 @@ const SearchFlights = () => {
               const data = await axios.get(
                 `${USER_API_ROUTES.FLIGHT_SCRAPE}?source=${source}&destination=${destination}&date=${flightDate}`
               );
-              if (data.data.id) {
+              if(data.data.flights){
+                console.log(data.data.flights)
+                setScrappedFlights(data.data.flights)
+                router.push(`/flights?date=${flightDate}`);
+              }
+               else if (data.data.id) {
                  setLoadingJobId(data.data.id);
                 setScraping(true);
                 setScrapingType("flight");

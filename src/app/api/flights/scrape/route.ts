@@ -9,6 +9,11 @@ export async function GET(request: Request) {
     const source = searchParams.get("source");
     const destination = searchParams.get("destination");
     const date = searchParams.get("date");
+    const flights = await prisma.flights.findMany({
+      where : {from : source, to:destination }
+    }) 
+    console.log(flights)
+
     const url = `https://www.kayak.com/flights/${source}-${destination}/${date}`+"?sort=bestflight_a";
     const response = await prisma.jobs.create({
       data: { url, jobType: { type: "flight", source, destination, date } },
@@ -18,11 +23,19 @@ export async function GET(request: Request) {
       jobType: { type: "flight", source, destination, date },
       id: response.id,
     });
-
-    return NextResponse.json(
-      { msg: "Job Running", id: response.id },
-      { status: 200 }
-    );
+     if(flights.length>0){
+      return NextResponse.json(
+        { flights:flights,
+           id: response.id },
+        { status: 200 }
+      );
+     }else{
+      return NextResponse.json(
+        { msg: "Job Running", id: response.id },
+        { status: 200 }
+      );
+     }
+   
   } catch (error) {
     if (error instanceof Prisma.PrismaClientKnownRequestError) {
       if (error.code === "P2002") {
